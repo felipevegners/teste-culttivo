@@ -1,6 +1,6 @@
 import API from "../services/API";
 
-const getPersonagens = async () => {
+const getCharacters = async () => {
   try {
     const { data } = await API.get("/characters");
     return data.data;
@@ -9,13 +9,13 @@ const getPersonagens = async () => {
   }
 };
 
-const getPersonagemDetalhes = async (idPersonagem) => {
+const getCharactersDetails = async (charId) => {
   try {
-    const { data } = await API.get(`/character/${idPersonagem}`);
+    const { data } = await API.get(`/characters/${charId}`);
     return data;
   } catch (error) {
     console.log(error);
   }
 };
 
-export { getPersonagens, getPersonagemDetalhes };
+export { getCharacters, getCharactersDetails };

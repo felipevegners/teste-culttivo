@@ -11,18 +11,34 @@ const HeroContext = createContext([]);
 
 export const HeroProvider = ({ children }) => {
   const [heroesList, setHeroesList] = useState([]);
+  const [consultTotal, setConsultTotal] = useState();
+  const [pageOffset, setPageOffset] = useState(0);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fecthHeroData = async () => {
+  const addFavProp = (data) => {
     const myFavHeroes = JSON.parse(localStorage.getItem("favHeroes")) || [];
-
-    await getCharacters().then((result) => {
-      let addFavProp = result.results.map((hero) => ({
-        ...hero,
-        favorite: !!myFavHeroes.find((fav) => fav.id === hero.id)
-      }));
-
-      setHeroesList(addFavProp);
+    return data.map((item) => ({
+      ...item,
+      favorite: !!myFavHeroes.find((fav) => fav.id === item.id)
+    }));
+  };
+  const getHeroData = async (offset, limit) => {
+    setTableLoading(true);
+    await getCharacters(offset, limit).then((result) => {
+      let favList = addFavProp(result.results);
+      setHeroesList([...heroesList, ...favList]);
+      if (result.count > pageOffset) setPageOffset(result.count);
+      setConsultTotal(result.total);
     });
+    setTableLoading(false);
+  };
+
+  const handlePagination = async (limit) => {
+    setIsLoading(true);
+    await getHeroData(pageOffset, limit);
+    setPageOffset((prev) => (prev += limit));
+    setIsLoading(false);
   };
 
   const handleAddFavHero = (heroData) => {
@@ -34,6 +50,9 @@ export const HeroProvider = ({ children }) => {
         ...hero,
         favorite: true
       });
+      message.success(
+        `The character ${hero.name} was added to your favorites list!`
+      );
     }
 
     setHeroesList(newData);
@@ -52,23 +71,29 @@ export const HeroProvider = ({ children }) => {
         ...hero,
         favorite: false
       });
+      message.success(
+        `The character ${hero.name} was removed from your favorites list!`
+      );
     }
 
     setHeroesList(newData);
     const favoritedHeroes = JSON.parse(localStorage.getItem("favHeroes"));
     const newFavoritesLS = favoritedHeroes.filter((hero) => hero.id !== heroId);
-
     localStorage.setItem("favHeroes", JSON.stringify(newFavoritesLS));
   };
 
   useEffect(() => {
-    fecthHeroData();
+    getHeroData();
   }, []);
 
   return (
     <HeroContext.Provider
       value={{
         heroesList,
+        consultTotal,
+        isLoading,
+        tableLoading,
+        handlePagination,
         handleAddFavHero,
         handleRemoveFavHero
       }}

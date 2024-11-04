@@ -1,8 +1,10 @@
 import API from "../services/API";
 
-const getCharacters = async () => {
+const getCharacters = async (offset, limit) => {
   try {
-    const { data } = await API.get("/characters");
+    const { data } = await API.get("/characters", {
+      params: { offset: offset, limit: limit }
+    });
     return data.data;
   } catch (error) {
     console.log(error);

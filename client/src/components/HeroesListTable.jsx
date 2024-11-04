@@ -5,7 +5,7 @@ import { HeartFilled, HeartOutlined } from "@ant-design/icons";
 import CharacterContext from "../context/CharacterContext";
 
 function HeroesListTable() {
-  const { heroesList, handleAddFavHero, handleRemoveFavHero } =
+  const { heroesList, tableLoading, handleAddFavHero, handleRemoveFavHero } =
     useContext(CharacterContext);
 
   const characterColumns = [
@@ -15,7 +15,7 @@ function HeroesListTable() {
       render: (record) => {
         return (
           <img
-            style={{ width: 180, height: 180, borderRadius: "50%" }}
+            style={{ width: 100, height: 100 }}
             src={`${record.path}.${record.extension}`}
           />
         );
@@ -30,27 +30,30 @@ function HeroesListTable() {
       dataIndex: "description"
     },
     {
-      title: "Favoritar",
+      title: "Favoritos",
+      width: 250,
       render: (record) => {
         return record.favorite === true ? (
           <Button
+            color="danger"
+            variant="solid"
             onClick={() => handleRemoveFavHero(record.id)}
-            type="primary"
             size="large"
             icon={<HeartFilled />}
           >
-            Desfavoritar
+            Remove Fav
           </Button>
         ) : (
           <Button
+            color="danger"
+            variant="outlined"
             onClick={() =>
               handleAddFavHero({ id: record.id, name: record.name })
             }
-            type="primary"
             size="large"
             icon={<HeartOutlined />}
           >
-            Favoritar
+            Favorite
           </Button>
         );
       }
@@ -59,11 +62,15 @@ function HeroesListTable() {
 
   if (heroesList.length < 1) return <Spin size="large" />;
   return (
-    <Table
-      columns={characterColumns}
-      dataSource={heroesList}
-      rowKey={(record) => record.id}
-    />
+    <>
+      <Table
+        columns={characterColumns}
+        dataSource={heroesList}
+        rowKey={(record) => record.id}
+        pagination={false}
+        loading={tableLoading}
+      />
+    </>
   );
 }
 
